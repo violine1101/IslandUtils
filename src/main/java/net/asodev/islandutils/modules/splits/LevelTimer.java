@@ -85,13 +85,13 @@ public class LevelTimer {
     }
     public void saveSplit() {
         if (splits != null) {
-            sendSplitCompeteMessage();
+            sendSplitCompleteMessage();
 
             Long millis = getCurrentSplitTimeMilis();
             splits.saveSplit(levelUid, levelName, millis);
         }
     }
-    public void sendSplitCompeteMessage() {
+    public void sendSplitCompleteMessage() {
         if (!options.isSendSplitTime()) return;
         String time = String.format("%.3fs", getCurrentSplitTime());
         Style tickFont = Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath("island", "icons")).withColor(ChatFormatting.WHITE);

@@ -37,7 +37,9 @@ public class ChatUtils {
     }
 
     public static void send(Component component) {
-        Minecraft.getInstance().getChatListener().handleSystemMessage(component, false);
+        Minecraft.getInstance().submit(() ->
+            Minecraft.getInstance().getChatListener().handleSystemMessage(component, false)
+        );
     }
 
     public static TextColor parseColor(String hex) {
