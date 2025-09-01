@@ -9,6 +9,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,6 +26,8 @@ public class ItemBarMixin {
     @Unique
     private static final Pattern PROGRESS_REGEX = Pattern.compile(".*\\n[\\uE001\\uE269\\uE26C\\uE266]* (\\d+)%.*");
     @Unique
+    private static final Pattern PROGRESS_TRUE_ZERO_REGEX = Pattern.compile(".*\\n[\\uE001\uE266]* 0%.*");
+    @Unique
     private static final String PROGRESS_COSMETIC_LABEL = "Left-Click to Equip\n";
     @Unique
     private static final String PROGRESS_COSMETIC_LABEL_2 = "Left-Click to Unequip\n";
@@ -32,6 +35,8 @@ public class ItemBarMixin {
     private static final String PROGRESS_BADGE_PINNED_LABEL = "Shift-Click to Unpin";
     @Unique
     private static final String PROGRESS_BADGE_LOCKED_LABEL = "\nUnlock this slot by reaching the below\namount of Skill Trophies.\n";
+    @Unique
+    private static final String PROGRESS_OUTFIT_LOCKED_LABEL = "Locked Outfit Slot\n\nSave a loadout of cosmetics and their";
     @Unique
     private static final String PROGRESS_QUEST_LABEL = "\nComplete any of the below tasks to\nfinish the quest.\n";
     @Unique
@@ -50,8 +55,6 @@ public class ItemBarMixin {
     private static final Pattern CHROMA_REGEX = Pattern.compile(".*\\n([\\uE02A\\uE02E\\uE02F\\uE02C\\uE02D\\uE02B]{5}) - (\\d+)\\uE328\\n.*");
 
     @Unique
-    private static final int PROGRESS_BAR_COLOR = ARGB.colorFromFloat(1.0F, 0.33F, 1.0F, 0.33F);
-    @Unique
     private static final int REPAIRABLE_BAR_COLOR = ARGB.colorFromFloat(1.0F, 1.0F, 0.33F, 0.33F);
 
     @Unique
@@ -66,21 +69,16 @@ public class ItemBarMixin {
 
         var isCosmetic = lore.contains(PROGRESS_COSMETIC_LABEL) || lore.contains(PROGRESS_COSMETIC_LABEL_2);
         var isProfileBadge = lore.contains(PROGRESS_BADGE_PINNED_LABEL) || lore.contains(PROGRESS_BADGE_LOCKED_LABEL);
-        if (isCosmetic || isProfileBadge) return Optional.empty();
+        var isOutfitSlot = lore.contains(PROGRESS_OUTFIT_LOCKED_LABEL);
+        if (isCosmetic || isProfileBadge || isOutfitSlot) return Optional.empty();
 
         var isBrokenTool = lore.contains(PROGRESS_TOOL_BROKEN_LABEL);
-        if (isBrokenTool) return Optional.of(new BarInfo(Fraction.ZERO, PROGRESS_BAR_COLOR));
+        if (isBrokenTool) return Optional.of(new BarInfo(Fraction.ZERO, ARGB.alpha(0)));
 
         var isRepairableTool = lore.contains(PROGRESS_TOOL_REPAIRABLE_LABEL);
         if (isRepairableTool) return Optional.of(new BarInfo(Fraction.ONE, REPAIRABLE_BAR_COLOR));
 
-        var matcher = PROGRESS_REGEX.matcher(lore);
-        var progresses = new ArrayList<Fraction>();
-        while (matcher.find()) {
-            var percentage = Integer.parseInt(matcher.group(1));
-            var fraction = Fraction.getFraction(percentage, 100);
-            progresses.add(fraction);
-        }
+        var progresses = getProgresses(lore);
         if (progresses.isEmpty()) return Optional.empty();
 
         var isQuest = lore.contains(PROGRESS_QUEST_LABEL);
@@ -94,7 +92,26 @@ public class ItemBarMixin {
             });
         }
 
-        return fraction.map(f -> new BarInfo(f, PROGRESS_BAR_COLOR));
+        return fraction.map(f -> new BarInfo(f, IslandOptions.getMisc().getProgressBarColorARGB()));
+    }
+
+    @Unique
+    private static @NotNull ArrayList<Fraction> getProgresses(String lore) {
+        var matcher = PROGRESS_REGEX.matcher(lore);
+        var progresses = new ArrayList<Fraction>();
+        while (matcher.find()) {
+            var percentage = Integer.parseInt(matcher.group(1));
+            if (percentage == 0) {
+                var trueZeroMatcher = PROGRESS_TRUE_ZERO_REGEX.matcher(matcher.group(0));
+                if (!trueZeroMatcher.matches()) {
+                    percentage = 1;
+                }
+            }
+
+            var fraction = Fraction.getFraction(percentage, 100);
+            progresses.add(fraction);
+        }
+        return progresses;
     }
 
     @Unique
