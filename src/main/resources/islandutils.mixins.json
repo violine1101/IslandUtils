@@ -13,6 +13,7 @@
     "ItemBarMixin",
     "discord.ConnectionMixin",
     "discord.ScoreDisplayMixin",
+    "network.ConnectionMixin",
     "resources.PackRepositoryMixin",
     "ui.SlotMixin"
   ],
