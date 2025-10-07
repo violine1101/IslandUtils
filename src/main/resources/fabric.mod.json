@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "islandutils",
   "version": "${version}",
-  "name": "IslandUtils",
-  "description": "A Utility mod for MCC Island",
-  "authors": ["Aso"],
+  "name": "IslandUtils: Violine Edition",
+  "description": "A Utility mod for MCC Island (violine1101's fork with some experimental features)",
+  "authors": ["Aso", "violine1101"],
   "contact": {
     "sources": "https://github.com/AsoDesu/IslandUtils",
     "homepage": "https://modrinth.com/mod/island-utils"
