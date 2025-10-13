@@ -61,7 +61,8 @@ public abstract class ItemIDMixin implements DataComponentHolder {
         itemPrintCounter = (itemPrintHotkeyHeld) ? itemPrintCounter + 1 : -1;
         if (itemPrintCounter == 0) printItemInfo();
 
-        if (!InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL)) return;
+        if (!InputConstants.isKeyDown(window, InputConstants.KEY_LCONTROL))
+            return;
 
         MutableComponent toAppend = Component.empty();
         if (this.has(DataComponents.CUSTOM_DATA)) tryAddCustomItemID(toAppend); // Append MCCI Custom Item ID
@@ -81,7 +82,7 @@ public abstract class ItemIDMixin implements DataComponentHolder {
 
     @Unique
     private Optional<Slot> getHoveredSlot() {
-        ItemStack me = (ItemStack)(Object)this;
+        ItemStack me = (ItemStack) (Object) this;
 
         Screen screen = Minecraft.getInstance().screen;
         if (screen == null) return Optional.empty();

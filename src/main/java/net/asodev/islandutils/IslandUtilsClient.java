@@ -2,6 +2,7 @@ package net.asodev.islandutils;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.asodev.islandutils.discord.DiscordPresenceUpdator;
+import net.asodev.islandutils.fontloader.FontLoaderManager;
 import net.asodev.islandutils.modules.DisguiseKeybind;
 import net.asodev.islandutils.modules.NoxesiumIntegration;
 import net.asodev.islandutils.modules.music.MusicManager;
@@ -19,12 +20,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import org.lwjgl.glfw.GLFW;
-
-import java.net.URI;
 
 @Environment(EnvType.CLIENT)
 public class IslandUtilsClient implements ClientModInitializer {
@@ -57,25 +53,18 @@ public class IslandUtilsClient implements ClientModInitializer {
         }
         new NoxesiumIntegration().init();
         MusicManager.init();
+
+        IslandUtilsEvents.PACK_FINAL_RESULT.register((uuid, finalResult) -> FontLoaderManager.warnAboutUnfulfilledAssets());
     }
 
     public static void onJoinMCCI(boolean isProduction) {
         System.out.println("Connected to MCCI!");
-        if (IslandUtils.availableUpdate != null) {
-            ChatUtils.sendWithPrefix(Component.translatable("islandutils.message.core.updateAvailable", IslandUtils.availableUpdate.title()));
-
-            URI releaseUri = URI.create(IslandUtils.availableUpdate.releaseUrl());
-            Style style = Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(releaseUri));
-            Component link = Component.literal(IslandUtils.availableUpdate.releaseUrl()).setStyle(style);
-            Component text = Component.translatable("islandutils.message.core.updateUrl").append(link);
-
-            ChatUtils.sendWithPrefix(text);
-        } else if (IslandUtils.isPreRelease()) {
-            ChatUtils.sendWithPrefix(Component.translatable("islandutils.message.core.preReleaseWarn"));
-        }
+        ChatUtils.sendVersionStateMessage(IslandUtils.availableUpdate);
 
         DiscordPresenceUpdator.create(!isProduction);
         MccIslandState.setGame(Game.HUB);
         IslandUtilsEvents.JOIN_MCCI.invoker().onEvent();
+        FontLoaderManager.reset();
+        MusicManager.stop();
     }
 }

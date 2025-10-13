@@ -1,5 +1,6 @@
 package net.asodev.islandutils.modules.music;
 
+import net.asodev.islandutils.IslandUtilsClient;
 import net.asodev.islandutils.mixins.accessors.SoundEngineAccessor;
 import net.asodev.islandutils.mixins.accessors.SoundManagerAccessor;
 import net.asodev.islandutils.modules.music.modifiers.ClassicHitwMusic;
@@ -7,6 +8,8 @@ import net.asodev.islandutils.modules.music.modifiers.HighQualityMusic;
 import net.asodev.islandutils.modules.music.modifiers.PreviousDynaballMusic;
 import net.asodev.islandutils.modules.music.modifiers.TgttosDomeModifier;
 import net.asodev.islandutils.modules.music.modifiers.TgttosDoubleTime;
+import net.asodev.islandutils.options.IslandOptions;
+import net.asodev.islandutils.options.saving.IslandUtilsSaveHandler;
 import net.asodev.islandutils.util.ChatUtils;
 import net.asodev.islandutils.util.MCCSoundInstance;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -36,7 +39,15 @@ public class MusicManager {
             "music.global.hole_in_the_wall",
             "music.global.sky_battle",
             "music.global.tgttosawaf",
-            "music.global.overtime_loop_music"
+            "music.global.overtime_loop_music",
+
+            "music.global.hub_classic",
+            "music.global.hub_like",
+            "music.global.hubbin",
+            "music.global.island",
+            "music.global.our_hub",
+            "music.global.relax_hub",
+            "music.global.we_are"
     );
 
     public static void init() {
@@ -52,7 +63,10 @@ public class MusicManager {
                 client.getSoundManager().stop(currentlyPlaying);
             }
         });
+
+        IslandOptions.load();
     }
+
 
     private static boolean shouldIgnore(SoundInfo info) {
         // ignore tracks that aren't the music tracks we wanna mess with
@@ -82,6 +96,7 @@ public class MusicManager {
 
         MCCSoundInstance instance = newSoundInfo.toSoundInstance();
         currentlyPlaying = instance;
+        ChatUtils.debug("Starting music: " + instance.getLocation());
         Minecraft.getInstance().getSoundManager().play(instance);
     }
 
@@ -112,6 +127,10 @@ public class MusicManager {
             modified = modifier.apply(modified);
         }
         return modified;
+    }
+
+    public static void stop() {
+        currentlyPlaying = null;
     }
 
     public static List<MusicModifier> getModifiers() {
