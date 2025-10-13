@@ -49,16 +49,6 @@ public class FontUtils {
         return minecraftFont;
     }
 
-    @Nullable
-    private static Font minecraftFont;
-
-    public static Font getMinecraftFont() {
-        if (minecraftFont == null) {
-            minecraftFont = Minecraft.getInstance().font;
-        }
-        return minecraftFont;
-    }
-
     private FontUtils() {
     }
 
