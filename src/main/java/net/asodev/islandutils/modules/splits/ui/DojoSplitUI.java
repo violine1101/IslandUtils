@@ -46,7 +46,7 @@ public class DojoSplitUI implements SplitUI {
     }
 
     public void renderSplitTime(GuiGraphics guiGraphics, int x, int y) {
-        String formattedTime = String.format("%.3f", timer.getCurrentSplitTime());
+        String formattedTime = String.format("%.3f", timer.getCurrentSplitTimeSeconds());
         Component splitTime = Component.literal(formattedTime);
         timerWidth = getMinecraftFont().width(splitTime);
         int tx = x + this.width() - timerWidth - 2;
@@ -57,16 +57,16 @@ public class DojoSplitUI implements SplitUI {
     public void renderSplitImprovement(GuiGraphics guiGraphics, int x, int y) {
         if (timer.isBetween()) return;
 
-        Double splitImprovement = timer.getSplitImprovement();
-        if (splitImprovement == null) return;
-        if (splitImprovement < timer.options.getShowTimerImprovementAt()) return;
+        var splitImprovement = timer.getSplitImprovement().orElseGet(
+            () -> new LevelTimer.SplitImprovement(
+                timer.getCurrentSplitTimeSeconds(),
+                LevelTimer.SplitImprovementType.NEW
+            )
+        );
+        if (splitImprovement.diffSeconds() < timer.options.getShowTimerImprovementAt()) return;
 
-        String formattedTime = String.format("%.2fs", splitImprovement);
-        ChatFormatting color = ChatFormatting.GREEN;
-        if (splitImprovement > 0) {
-            color = ChatFormatting.RED;
-            formattedTime = "+" + formattedTime;
-        }
+        var formattedTime = splitImprovement.getText();
+        var color = splitImprovement.getColor();
 
         Font font = Minecraft.getInstance().font;
         Component improvementTime = Component.literal(formattedTime).withStyle(CUSTOM_SPLIT_STYLE.withColor(color));

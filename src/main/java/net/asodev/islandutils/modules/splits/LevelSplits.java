@@ -6,11 +6,7 @@ import com.google.gson.JsonObject;
 import net.asodev.islandutils.options.IslandOptions;
 import net.asodev.islandutils.util.ChatUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LevelSplits {
 
@@ -48,15 +44,9 @@ public class LevelSplits {
         ChatUtils.debug("LevelSplits - Time (" + time + "ms) was saved with uid: " + uid);
         SplitManager.saveAsync();
     }
-    public Double getSplit(String level) {
-        if (!splits.containsKey(level)) return null;
-        SplitType type = IslandOptions.getSplits().getSaveMode();
-        double value = 0.0;
-        switch (type) {
-            case BEST -> value = splits.get(level).best();
-            case AVG -> value =  splits.get(level).avg();
-        }
-        return value / 1000d;
+
+    public Optional<Split> getSplit(String level) {
+        return Optional.ofNullable(splits.get(level));
     }
 
     public JsonObject toJson() {
@@ -85,6 +75,7 @@ public class LevelSplits {
         this.expires = expires;
     }
 
+    // All times in milliseconds
     public record Split(Long best, Double avg, List<Long> times){
         public Split addTime(Long time) {
             List<Long> newList = new ArrayList<>(times);
@@ -92,6 +83,13 @@ public class LevelSplits {
             double newAvg = newList.stream().mapToDouble(d -> d).average().orElse(0.0);
             Long newBest = time < best ? time : best;
             return new Split(newBest, newAvg, Collections.unmodifiableList(newList));
+        }
+
+        public Double getDiffAsSeconds(double newSplitMs) {
+            return switch (IslandOptions.getSplits().getSaveMode()) {
+                case BEST -> (newSplitMs - this.best) / 1000d;
+                case AVG -> (newSplitMs - this.avg) / 1000d;
+            };
         }
 
         public static Split fromJson(JsonElement json) {

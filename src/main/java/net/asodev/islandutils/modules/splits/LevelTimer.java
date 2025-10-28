@@ -1,5 +1,6 @@
 package net.asodev.islandutils.modules.splits;
 
+import net.asodev.islandutils.modules.splits.LevelSplits.Split;
 import net.asodev.islandutils.modules.splits.ui.DojoSplitUI;
 import net.asodev.islandutils.modules.splits.ui.SplitUI;
 import net.asodev.islandutils.options.IslandOptions;
@@ -19,6 +20,7 @@ import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,13 +90,13 @@ public class LevelTimer {
         if (splits != null) {
             sendSplitCompleteMessage();
 
-            Long millis = getCurrentSplitTimeMilis();
+            Long millis = getCurrentSplitTimeMs();
             splits.saveSplit(levelUid, levelName, millis);
         }
     }
     public void sendSplitCompleteMessage() {
         if (!options.isSendSplitTime()) return;
-        String time = String.format("%.3fs", getCurrentSplitTime());
+        String time = String.format("%.3fs", getCurrentSplitTimeSeconds());
 
         MutableComponent component = Component.literal("[").withStyle(ChatFormatting.GREEN)
                 .append(FontUtils.ICON_TICK_SMALL)
@@ -106,46 +108,101 @@ public class LevelTimer {
         }
         ChatUtils.send(component);
     }
-    private Component getSplitImprovementComponent() {
-        Double splitImprovement = getSplitImprovement();
-        if (splitImprovement == null) splitImprovement = 0d;
 
-        String formattedTime = String.format("%.2f", splitImprovement);
-        ChatFormatting color;
-        Component icon;
-        if (splitImprovement > 0) {
-            color = ChatFormatting.RED;
-            icon = FontUtils.ICON_SPLIT_UP;
-            formattedTime = "+" + formattedTime;
-        } else if (splitImprovement < 0) {
-            color = ChatFormatting.GREEN;
-            icon = FontUtils.ICON_SPLIT_DOWN;
-        } else {
-            color = ChatFormatting.YELLOW;
-            icon = Component.literal("-").withStyle(color);
+    public enum SplitImprovementType {
+        NEW,
+        BEST,
+        AVG_OR_BETTER,
+        WORSE_THAN_AVG;
+
+        public static SplitImprovementType get(Split prevSplit, double newTimeMs) {
+            if (newTimeMs <= prevSplit.best()) {
+                return SplitImprovementType.BEST;
+            } else if (newTimeMs <= prevSplit.avg()) {
+                return SplitImprovementType.AVG_OR_BETTER;
+            } else {
+                return SplitImprovementType.WORSE_THAN_AVG;
+            }
         }
+    }
+    public record SplitImprovement(double diffSeconds, SplitImprovementType type) {
+        public static SplitImprovement get(Split prevSplit, double newTimeMs) {
+            return new SplitImprovement(
+                prevSplit.getDiffAsSeconds(newTimeMs),
+                SplitImprovementType.get(prevSplit, newTimeMs)
+            );
+        }
+
+        public String getText() {
+            String formattedTime = String.format("%.2f", this.diffSeconds);
+            String prefix = this.diffSeconds > 0 ? "+" : "";
+            if (formattedTime.equals("0.00")) {
+                prefix = "±";
+            }
+            return prefix + formattedTime;
+        }
+
+        public ChatFormatting getColor() {
+            var splitDisplayMode = IslandOptions.getSplits().getSaveMode();
+            return switch (this.type) {
+                case NEW -> ChatFormatting.GREEN;
+                case BEST -> switch (splitDisplayMode) {
+                    case BEST -> ChatFormatting.GREEN;
+                    case AVG -> ChatFormatting.GOLD;
+                };
+                case AVG_OR_BETTER -> switch (splitDisplayMode) {
+                    case BEST -> ChatFormatting.YELLOW;
+                    case AVG -> ChatFormatting.GREEN;
+                };
+                case WORSE_THAN_AVG -> ChatFormatting.RED;
+            };
+        }
+
+        public Component getIcon() {
+            var splitDisplayMode = IslandOptions.getSplits().getSaveMode();
+            return switch (this.type) {
+                case NEW -> FontUtils.ICON_SPLIT_DOWN;
+                case BEST -> switch (splitDisplayMode) {
+                    case BEST -> FontUtils.ICON_SPLIT_DOWN;
+                    case AVG -> FontUtils.ICON_SPLIT_DOWN_GOLD;
+                };
+                case AVG_OR_BETTER -> switch (splitDisplayMode) {
+                    case BEST -> FontUtils.ICON_SPLIT_UP_YELLOW;
+                    case AVG -> FontUtils.ICON_SPLIT_DOWN;
+                };
+                case WORSE_THAN_AVG -> FontUtils.ICON_SPLIT_UP;
+            };
+        }
+    }
+
+    public long getCurrentSplitTimeMs() {
+        return System.currentTimeMillis() - lastSplitTimestamp;
+    }
+    public double getCurrentSplitTimeSeconds() {
+        return getCurrentSplitTimeMs() / 1000d;
+    }
+
+    public Optional<SplitImprovement> getSplitImprovement() {
+        double newSplitTimeMs = getCurrentSplitTimeMs();
+        if (splits == null) {
+            return Optional.empty();
+        }
+        return splits.getSplit(levelUid).map(prevSplit -> SplitImprovement.get(prevSplit, newSplitTimeMs));
+    }
+
+    private Component getSplitImprovementComponent() {
+        var splitImprovement = getSplitImprovement().orElseGet(
+            () -> new SplitImprovement(getCurrentSplitTimeSeconds(), SplitImprovementType.NEW)
+        );
+
+        var formattedTime = splitImprovement.getText();
+        var color = splitImprovement.getColor();
+        var icon = splitImprovement.getIcon();
 
         return Component.literal(" (").withStyle(Style.EMPTY)
                 .append(icon)
                 .append(Component.literal(" " + formattedTime).withStyle(color))
                 .append(Component.literal(")").withStyle(Style.EMPTY));
-    }
-
-    public Long getCurrentSplitTimeMilis() {
-        return (System.currentTimeMillis() - lastSplitTimestamp);
-    }
-    public double getCurrentSplitTime() {
-        return getCurrentSplitTimeMilis() / 1000d;
-    }
-    public Double getSplitImprovement() {
-        double currentSplitTime = getCurrentSplitTime();
-        if (splits == null) {
-            return null;
-        } else {
-            Double split = splits.getSplit(levelUid);
-            if (split == null) return null;
-            return currentSplitTime - split;
-        }
     }
 
     public static void onSound(ClientboundSoundPacket clientboundSoundPacket) {
