@@ -134,8 +134,12 @@ public class LevelTimer {
         }
 
         public String getText() {
+            String formattedTime = String.format("%.2f", this.diffSeconds);
             String prefix = this.diffSeconds > 0 ? "+" : "";
-            return prefix + String.format("%.2f", this.diffSeconds);
+            if (formattedTime.equals("0.00")) {
+                prefix = "±";
+            }
+            return prefix + formattedTime;
         }
 
         public ChatFormatting getColor() {
@@ -164,7 +168,7 @@ public class LevelTimer {
                 };
                 case AVG_OR_BETTER -> switch (splitDisplayMode) {
                     case BEST -> FontUtils.ICON_SPLIT_UP_YELLOW;
-                    case AVG -> FontUtils.ICON_SPLIT_UP;
+                    case AVG -> FontUtils.ICON_SPLIT_DOWN;
                 };
                 case WORSE_THAN_AVG -> FontUtils.ICON_SPLIT_UP;
             };

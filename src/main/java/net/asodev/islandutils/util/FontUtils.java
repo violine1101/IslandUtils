@@ -30,7 +30,7 @@ public class FontUtils {
     public static Component ICON_WARNING = Component.literal("\ue008").withStyle(CUSTOM_ICONS_STYLE);
     public static Component ICON_SPLIT_UP = Component.literal("\ue009").withStyle(CUSTOM_ICONS_STYLE);
     public static Component ICON_SPLIT_DOWN = Component.literal("\ue010").withStyle(CUSTOM_ICONS_STYLE);
-    public static Component ICON_SPLIT_UP_YELLOW = Component.literal("\ue010").withStyle(CUSTOM_ICONS_STYLE);
+    public static Component ICON_SPLIT_UP_YELLOW = Component.literal("\ue011").withStyle(CUSTOM_ICONS_STYLE);
     public static Component ICON_SPLIT_DOWN_GOLD = Component.literal("\ue012").withStyle(CUSTOM_ICONS_STYLE);
 
     public static Component CHAT_CHANNEL_LOCAL = Component.literal("\ue001").withStyle(CUSTOM_ICONS_STYLE);
