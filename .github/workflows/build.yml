@@ -29,7 +29,7 @@ jobs:
         run: |
           RELEASE_SCRIPT_RESULT=$(sh ./release_version.sh)
           echo -e $RELEASE_SCRIPT_RESULT
-          echo $(echo $RELEASE_SCRIPT_RESULT | grep -Po "CREATE_RELEASE=.*") >> $GITHUB_ENV
+          echo $(echo $RELEASE_SCRIPT_RESULT | grep -Po "CREATE_RELEASE=.* \\n VERSION=.*") >> $GITHUB_ENV
       - name: Create release
         uses: softprops/action-gh-release@v2
         if: env.CREATE_RELEASE == 'true'
@@ -37,3 +37,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: build/libs
+          name: ${{ env.RELEASE_VERSION }}
+          tag_name: ${{ env.RELEASE_VERSION }}
