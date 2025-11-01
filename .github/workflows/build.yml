@@ -1,11 +1,11 @@
-name: Build
+name: Build and Release
 on: 
   push:
     branches:
       - 'violine-edition'
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project sources
@@ -27,3 +27,10 @@ jobs:
       - name: Trigger Release
         id: get_version
         run: sh ./release_version.sh
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        if: env.RELEASE == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: build/libs
