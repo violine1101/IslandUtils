@@ -1,11 +1,11 @@
-name: Build and Release
-on: 
+name: Release
+on:
   push:
-    branches:
-      - 'violine-edition'
+    tags:
+      - 've.*'
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project sources
@@ -24,6 +24,9 @@ jobs:
         with:
           name: Package
           path: build/libs
-      - name: Trigger Release
-        id: get_version
-        run: sh ./release_version.sh
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: build/libs
