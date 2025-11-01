@@ -26,10 +26,13 @@ jobs:
           path: build/libs
       - name: Trigger Release
         id: get_version
-        run: sh ./release_version.sh
+        run: |
+          RELEASE_SCRIPT_RESULT=$(sh ./release_version.sh)
+          echo -e $RELEASE_SCRIPT_RESULT
+          echo $(echo $RELEASE_SCRIPT_RESULT | grep -Po "CREATE_RELEASE=.*") >> $GITHUB_ENV
       - name: Create release
         uses: softprops/action-gh-release@v2
-        if: env.RELEASE == 'true'
+        if: env.CREATE_RELEASE == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
