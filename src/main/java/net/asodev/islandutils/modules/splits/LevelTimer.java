@@ -208,7 +208,7 @@ public class LevelTimer {
         }
         return Component.literal(" (").withStyle(Style.EMPTY)
             .append(icon)
-            .append(Component.literal(" " + formattedTime).withStyle(color))
+            .append(Component.literal(formattedTime).withStyle(color))
             .append(Component.literal(")").withStyle(Style.EMPTY));
     }
 
