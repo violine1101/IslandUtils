@@ -165,7 +165,7 @@ public class LevelTimer {
         public Component getIcon() {
             var splitDisplayMode = IslandOptions.getSplits().getSaveMode();
             return switch (this.type) {
-                case NEW -> FontUtils.ICON_SPLIT_DOWN;
+                case NEW -> Component.empty();
                 case BEST -> switch (splitDisplayMode) {
                     case BEST -> FontUtils.ICON_SPLIT_DOWN;
                     case AVG -> FontUtils.ICON_SPLIT_DOWN_GOLD;
@@ -203,14 +203,13 @@ public class LevelTimer {
         var color = splitImprovement.getColor();
         var icon = splitImprovement.getIcon();
 
-        if (splitImprovement.type == SplitImprovementType.NEW) {
-            return Component.literal(formattedTime).withStyle(color);
-        } else {
-            return Component.literal(" (").withStyle(Style.EMPTY)
-                .append(icon)
-                .append(Component.literal(" " + formattedTime).withStyle(color))
-                .append(Component.literal(")").withStyle(Style.EMPTY));
+        if (splitImprovement.type != SplitImprovementType.NEW) {
+            formattedTime = " " + formattedTime;
         }
+        return Component.literal(" (").withStyle(Style.EMPTY)
+            .append(icon)
+            .append(Component.literal(" " + formattedTime).withStyle(color))
+            .append(Component.literal(")").withStyle(Style.EMPTY));
     }
 
     public static void onSound(ClientboundSoundPacket clientboundSoundPacket) {
