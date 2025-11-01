@@ -103,7 +103,7 @@ public class LevelTimer {
                 .append("] ")
                 .append(Component.translatable("islandutils.message.pkwSplits.splitComplete", levelName))
                 .append(Component.literal(time).withStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)));
-        if (options.isShowSplitImprovements()) {
+        if (options.isShowSplitImprovements() && getSplitImprovement().isPresent()) {
             component.append(Component.empty().withStyle(ChatFormatting.WHITE).append(getSplitImprovementComponent()));
         }
         ChatUtils.send(component);
