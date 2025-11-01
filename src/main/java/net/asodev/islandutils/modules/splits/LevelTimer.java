@@ -135,6 +135,10 @@ public class LevelTimer {
 
         public String getText() {
             String formattedTime = String.format("%.2f", this.diffSeconds);
+            if (type == SplitImprovementType.NEW) {
+                return formattedTime;
+            }
+
             String prefix = this.diffSeconds > 0 ? "+" : "";
             if (formattedTime.equals("0.00")) {
                 prefix = "±";
@@ -199,10 +203,14 @@ public class LevelTimer {
         var color = splitImprovement.getColor();
         var icon = splitImprovement.getIcon();
 
-        return Component.literal(" (").withStyle(Style.EMPTY)
+        if (splitImprovement.type == SplitImprovementType.NEW) {
+            return Component.literal(formattedTime).withStyle(color);
+        } else {
+            return Component.literal(" (").withStyle(Style.EMPTY)
                 .append(icon)
                 .append(Component.literal(" " + formattedTime).withStyle(color))
                 .append(Component.literal(")").withStyle(Style.EMPTY));
+        }
     }
 
     public static void onSound(ClientboundSoundPacket clientboundSoundPacket) {
