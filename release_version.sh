@@ -2,12 +2,13 @@
 VERSION=$(grep -oP '^mod_version=(.*)$' gradle.properties | sed 's/mod_version=//')
 CREATE_RELEASE=false
 if [ -n "$VERSION" ]; then
-  echo "# Detected mod version $VERSION\n"
+  echo "# Detected mod version $VERSION; checking if tag exists\n"
   # Was able to extract version. Check if version already exists:
   git pull --tags
   echo "\n"
   EXISTING_TAG=$(git tag -l $VERSION)
   if [ -z "$EXISTING_TAG" ]; then
+    echo "# Tag $VERSION does not yet exist; creating it\n"
     # The tag doesn't exist yet; create a new one
     git tag $VERSION
     echo "\n"
