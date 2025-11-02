@@ -134,7 +134,7 @@ public class LevelTimer {
         }
 
         public String getText() {
-            String formattedTime = String.format("%.2f", this.diffSeconds);
+            String formattedTime = String.format("%.2f", this.diffSeconds) + "s";
             if (type == SplitImprovementType.NEW) {
                 return formattedTime;
             }
@@ -143,7 +143,7 @@ public class LevelTimer {
             if (formattedTime.equals("0.00")) {
                 prefix = "±";
             }
-            return prefix + formattedTime + "s";
+            return prefix + formattedTime;
         }
 
         public ChatFormatting getColor() {
