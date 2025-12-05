@@ -134,12 +134,12 @@ public class LevelTimer {
         }
 
         public String getText() {
-            String formattedTime = String.format("%.2f", this.diffSeconds) + "s";
+            String formattedTime = String.format("%.2f", Math.abs(this.diffSeconds));
             if (type == SplitImprovementType.NEW) {
-                return formattedTime;
+                return formattedTime + "s";
             }
 
-            String prefix = this.diffSeconds > 0 ? "+" : "";
+            String prefix = this.diffSeconds > 0 ? "+" : "-";
             if (formattedTime.equals("0.00")) {
                 prefix = "±";
             }
