@@ -143,7 +143,7 @@ public class LevelTimer {
             if (formattedTime.equals("0.00")) {
                 prefix = "±";
             }
-            return prefix + formattedTime;
+            return prefix + formattedTime + "s";
         }
 
         public ChatFormatting getColor() {
