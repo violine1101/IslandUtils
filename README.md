@@ -1,6 +1,23 @@
-# Island Utils
+# Island Utils: Violine Edition
 
-A client-side utility mod for MCC Island
+A fork of [IslandUtils](https://github.com/AsoDesu/IslandUtils) by [AsoDesu](https://github.com/AsoDesuAsoDesu) with experimental features and bug fixes.
+
+Since this mod is experimental, use at your own caution.
+
+## About Violine Edition
+
+Violine Edition currently has the following experimental features that are not in the main mod:
+- Progress bars for icons in the inventory (e.g. quests, reputation collected on tooltips, cosmetic chromas)
+- Additional stage for splits in the Parkour Warrior Dojo:
+  - If comparing to the best split, yellow stage indicating that it's still better than average
+  - If comparing to the average split time, golden stage indicating that the split is best overall
+  - Some more improvements with
+- Experimental bug fix for [#110](https://github.com/AsoDesu/IslandUtils/issues/110) (Random IndexOutOfBoundsException in Parkour Warrior Dojo)
+- More to come!
+
+## About IslandUtils
+
+IslandUtils is a client-side utility mod for [MCC Island](https://mccisland.net).
 
 **Requires Minecraft 1.20 or higher, [Yet Another Config Lib](https://modrinth.com/mod/yacl) and [Noxesium](https://modrinth.com/mod/noxesium)**
 
